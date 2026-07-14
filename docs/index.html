@@ -16,5 +16,9 @@
     <li><a href="three-demo.html">Three.js</a> -- biblioteca, ~28 linhas de código, precisa também de um bloco <code>importmap</code> à parte e do addon <code>OrbitControls</code> (não vem no core)</li>
   </ul>
   <p>Ver o código-fonte de cada página (Ctrl/Cmd+U ou "Ver código-fonte") para comparar.</p>
+
+  <h2>Porque é que o Three.js precisa de mais coisas?</h2>
+  <p><strong>OrbitControls</strong> é o que dá o controlo da câmara por rato (arrastar para rodar, scroll para aproximar/afastar). No Babylon.js isto já vem de série na câmara (<code>camera.attachControl(...)</code>, uma linha); no Three.js as câmaras não reagem ao rato sozinhas -- é preciso ligar este "addon" à parte, e sem ele a câmara fica completamente parada.</p>
+  <p><strong>importmap</strong> é um bloco que diz ao browser onde ir buscar cada peça do Three.js (o núcleo e os addons, como o OrbitControls) quando se escreve <code>import ... from "three"</code> sem usar nenhuma ferramenta de build (Webpack, Vite, etc.). O Babylon.js não precisa disto porque vem tudo junto num único ficheiro, carregado com um <code>&lt;script&gt;</code> normal -- daí a diferença de linhas ser ainda maior do que parece à primeira vista.</p>
 </body>
 </html>
