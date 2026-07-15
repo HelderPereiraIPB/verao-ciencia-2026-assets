@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Babylon.js 3D Scene - Aula</title>
+    <style>
+        html, body {
+            overflow: hidden;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        #renderCanvas {
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+    </style>
+    <!-- Babylon.js core e loaders (para suportar .gltf, .glb, .obj) -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    
+    <!-- TypeScript Compiler (Para rodar .ts direto no navegador sem NPM!) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typescript/5.1.6/typescript.min.js"></script>
+</head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+    
+    <script>
+        // Simulador de ambiente "Playground" para rodar o código dos alunos
+        async function carregarTypeScript() {
+            try {
+                const resposta = await fetch('babylon final.ts');
+                if (!resposta.ok) throw new Error('Falhou o fetch');
+                
+                let codigoTS = await resposta.text();
+                
+                // Transpila sempre para CommonJS para podermos extrair os exports
+                window.exports = {};
+                const codigoJS = ts.transpile(codigoTS, {
+                    target: ts.ScriptTarget.ES2015,
+                    module: ts.ModuleKind.CommonJS
+                });
+                
+                // Configura o motor do Babylon de forma global ANTES do código executar (Playground mode)
+                window.canvas = document.getElementById("renderCanvas");
+                window.engine = new BABYLON.Engine(window.canvas, true);
+
+                // Injeta e executa o código
+                const script = document.createElement('script');
+                script.text = codigoJS;
+                document.body.appendChild(script);
+
+                // A função createScene pode estar no exports.default ou solta na janela
+                let fnCreateScene = window.exports.default || window.createScene;
+
+                if (typeof fnCreateScene !== "function") {
+                    throw new Error("Função createScene não encontrada. Verifica o código final do ficheiro.");
+                }
+
+                // Cria a cena (suportando funções assíncronas, como a do professor)
+                const scene = await fnCreateScene();
+
+                // Arranca o render loop
+                window.engine.runRenderLoop(function () {
+                    if (scene) {
+                        scene.render();
+                    }
+                });
+
+                // Ajuste de ecrã
+                window.addEventListener("resize", function () {
+                    window.engine.resize();
+                });
+
+            } catch (erro) {
+                console.error("Erro a carregar/executar a cena:", erro);
+                alert("Erro: Verifica a consola do navegador para mais detalhes.");
+            }
+        }
+        
+        carregarTypeScript();
+    </script>
+</body>
+</html>
